@@ -58,7 +58,7 @@ while True:  #This is a forever loop
 
     #check if user wants to quit the program (pressing 'q')
     if cv2.waitKey(10) == ord('q'):
-        x = pyautogui.confirm("Close the Program 'ChikonEye'?") 
+        x = pyautogui.confirm("Close the Program 'Screen_locking'?") 
         if x == 'OK':
             break
 
