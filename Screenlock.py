@@ -39,18 +39,37 @@ while True:  #This is a forever loop
         id, conf = rec.predict(roi_gray)
         #cv2.putText(np.array(roi_gray), str(id), font, 1, col, strk)
         print(id) #prints the id's
-        
-        #if sees unauthorized person
-        if id != 1 : 
+
+        profile = getProfile(id)
+            
+        if(value == 1):
+                print("Authorized")
+
+        else:
+            print("UnAuthorized")
             #execute lock command
             pyautogui.hotkey('win', 'r')   #win + run key combo
             pyautogui.typewrite("cmd\n")   # type cmd and 'Enter'= '\n'
             sleep(0.500)       #a bit delay <needed!>
             #windows lock code to command prompt and hit 'Enter'
-            pyautogui.typewrite("rundll32.exe user32.dll, LockWorkStation\n") 
+            pyautogui.typewrite("rundll32.exe user32.dll, LockWorkStation\n")    
 
-        elif id == 1 or id == 5:      #if authorized person 
+        
+        '''if id == 1:      #if authorized person 
+
             print("Authorized Person\n") #do nothing
+
+        elif id != 1: 
+            #execute lock command
+            print("UnAuthorized")
+
+
+            pyautogui.hotkey('win', 'r')   #win + run key combo
+            pyautogui.typewrite("cmd\n")   # type cmd and 'Enter'= '\n'
+            sleep(0.500)       #a bit delay <needed!>
+            #windows lock code to command prompt and hit 'Enter'
+            pyautogui.typewrite("rundll32.exe user32.dll, LockWorkStation\n") '''
+
 
         
     

@@ -4,23 +4,79 @@ import pyautogui
 from time import sleep
 from PIL import Image
 import os
+import sqlite3
 
 #location of opencv haarcascade <change according to your file location>
 face_cascade = cv2.CascadeClassifier("E:\\face_recognization\\opencv\\sources\\data\haarcascades\\haarcascade_frontalface_default.xml") 
 cap = cv2.VideoCapture(0)   # 0 = main camera , 1 = extra connected webcam and so on.
 rec = cv2.face.LBPHFaceRecognizer_create()
 
-#the path where the code is saved
-#pathz = "E:\\Git Folders\\OpenCV_Screen_Locking\\dataSet" #Change this
+
+def insertOrUpdate(Id, Name):
+    conn = sqlite3.connect("E:\\Git Folders\\OpenCV_Screen_Locking\\FaceData.db")
+    cmd = "SELECT * FROM Data WHERE ID = "+ str(Id)
+    cursor = conn.execute(cmd)
+    isRecordExit = 0
+    for row in cursor:
+        isRecordExit = 1
+
+    if(isRecordExit == 1):
+        cmd = "UPDATE Data SET Name" + str(Name) + "WHERE ID =" + str(Id)
+
+    else:
+        cmd = "Insert into Data(ID,Name) Values (" +str(Id) + "," +str(Name)+ ")"
+
+    conn.execute(cmd)
+    conn.commit()
+    conn.close()
+
 
 
 #recogizer module
+def getProfile(id):
+
+    conn = sqlite3.connect("E:\\Git Folders\\OpenCV_Screen_Locking\\FaceData.db")
+    cmd = "SELECT * FROM Data WHERE ID =" + str(id)
+
+    cursor = conn.execute(cmd)
+    profile = None
+    for row in cursor:
+        profile = row
+    conn.close()
+    return profile
+
+
+def getID(path1):
+
+    imagePaths = [os.path.join(path1, f) for f in os.listdir(path1)]
+
+    for imagepath in imagePaths:
+
+        faceImg = Image.open(imagepath).convert("L")
+        faceNp = np.array(faceImg, 'uint8')
+
+        ID = int(os.path.split(imagepath)[-1].split('.')[1])
+
+        return ID
+
+
 def recog():
     
     
-    rec.read("E:\\Git Folders\\OpenCV_Screen_Locking\\recognize\\training.yml")  #yml file location 
+    rec.read("E:\\Git Folders\\OpenCV_Screen_Locking\\recognize\\training.yml")  #yml file location
+
     
-    id = 0  #set id variable to zero
+    Id = pyautogui.prompt(text="""
+    Enter User ID.\n\nnote: numeric data only.""", title='ChikonEye', default='none')
+    #check for user input
+    
+    #Id = 1 #set id variable to zero
+
+    value = 0
+
+    sample = 0
+
+    pathz = "E:\\Git Folders\\OpenCV_Screen_Locking\\newDataSet"
 
     font = cv2.FONT_HERSHEY_SIMPLEX 
     
@@ -42,32 +98,69 @@ def recog():
             end_cord_x = x+w
             end_cord_y = y+h 
 
+            sample = sample + 1
+
+            cv2.imwrite("E:\\Git Folders\\OpenCV_Screen_Locking\\newDataSet\\User." + str(Id) + "." + str(sample) + ".jpg", roi_gray)
+
             cv2.rectangle(frame, (x,y), (end_cord_x, end_cord_y), color, stroke)
+
+            
+            cv2.waitKey(100)
+
+            cv2.imshow("Face", frame)
 
             #***detect
             id, conf = rec.predict(roi_gray)
             #cv2.putText(np.array(roi_gray), str(id), font, 1, col, strk)
-            print(id) #prints the id's
-        
-            #if sees unauthorized person
-            if id != 1: 
+            #print(id) #prints the id's
+            profile = getProfile(id)
+            
+            value = profile[1]
+
+            print("val",value)
+
+            Id = getID(pathz)
+
+            print(Id)
+
+            if(Id == value):
+
+                print("Authorized")
+
+            
+            else:
+
+                print("UnAuthorized")
                 #execute lock command
                 pyautogui.hotkey('win', 'r')   #win + run key combo
                 pyautogui.typewrite("cmd\n")   # type cmd and 'Enter'= '\n'
                 sleep(0.500)       #a bit delay <needed!>
                 #windows lock code to command prompt and hit 'Enter'
-                pyautogui.typewrite("rundll32.exe user32.dll, LockWorkStation\n") 
+                pyautogui.typewrite("rundll32.exe user32.dll, LockWorkStation\n")    
 
-            elif id == 1:      #if authorized person 
+
+            '''if id == 1:      #if authorized person 
                 print("Authorized Person\n") #do nothing
+
+            #if sees unauthorized person
+            elif id != 1: 
+
+                print("UnAuthorized")
+                #execute lock command
+                pyautogui.hotkey('win', 'r')   #win + run key combo
+                pyautogui.typewrite("cmd\n")   # type cmd and 'Enter'= '\n'
+                sleep(0.500)       #a bit delay <needed!>
+                #windows lock code to command prompt and hit 'Enter'
+                pyautogui.typewrite("rundll32.exe user32.dll, LockWorkStation\n")''' 
+
 
         
     
-        cv2.imshow('ChikonEye', frame)
+        cv2.imshow('Face', frame)
 
         #check if user wants to quit the program (pressing 'q')
         if cv2.waitKey(10) == ord('q'):
-            op = pyautogui.confirm("Close the Program 'ChikonEye'?") 
+            op = pyautogui.confirm("Close the Program 'Recognition'?") 
             if op == 'OK':
                 print("Out")
                 break
@@ -87,6 +180,10 @@ def data_Train():
     id = pyautogui.prompt(text="""
     Enter User ID.\n\nnote: numeric data only.""", title='ChikonEye', default='none')
     #check for user input
+    name = pyautogui.prompt(text="""
+    Enter User ID.\n\nnote: numeric data only.""", title='ChikonEye', default='none')
+
+    insertOrUpdate(id, name)    
     
     """
     if id >  :
@@ -118,7 +215,7 @@ def data_Train():
 
             cv2.imshow('Face', img)  #show image while capturing
             cv2.waitKey(1)
-            if(sampleNum > 20): 
+            if(sampleNum > 30): 
                 break   
             
     trainer() #Train the model based on the new images
