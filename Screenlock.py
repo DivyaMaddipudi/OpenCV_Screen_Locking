@@ -2,6 +2,7 @@ import numpy as np  #numpy library as np
 import cv2       #openCv library
 import pyautogui  #pyautogui 
 from time import sleep  #time library 
+import glob
 
 pyautogui.FAILSAFE = False   #pyautogui failsafe to false (see doc)
 
@@ -40,19 +41,27 @@ while True:  #This is a forever loop
         #cv2.putText(np.array(roi_gray), str(id), font, 1, col, strk)
         print(id) #prints the id's
 
-        profile = getProfile(id)
+        #profile = getProfile(id)
+        img = glob.glob('E:\\Git Folders\\OpenCV_Screen_Locking\\dataSet\\*.jpg')[0].split("\\")[-1]
             
-        if(value == 1):
-                print("Authorized")
+        img_id = img.split(".")[1]
+            
+        final_id = int(img_id)
+            
+        if(id != final_id):
 
-        else:
             print("UnAuthorized")
-            #execute lock command
+                #execute lock command
             pyautogui.hotkey('win', 'r')   #win + run key combo
             pyautogui.typewrite("cmd\n")   # type cmd and 'Enter'= '\n'
             sleep(0.500)       #a bit delay <needed!>
-            #windows lock code to command prompt and hit 'Enter'
+                #windows lock code to command prompt and hit 'Enter'
             pyautogui.typewrite("rundll32.exe user32.dll, LockWorkStation\n")    
+
+            
+        else:
+
+            print("Authorized")
 
         
         '''if id == 1:      #if authorized person 

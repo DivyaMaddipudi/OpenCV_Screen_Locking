@@ -5,13 +5,14 @@ from time import sleep
 from PIL import Image
 import os
 import sqlite3
+import glob
 
 #location of opencv haarcascade <change according to your file location>
 face_cascade = cv2.CascadeClassifier("E:\\face_recognization\\opencv\\sources\\data\haarcascades\\haarcascade_frontalface_default.xml") 
 cap = cv2.VideoCapture(0)   # 0 = main camera , 1 = extra connected webcam and so on.
 rec = cv2.face.LBPHFaceRecognizer_create()
 
-
+'''
 def insertOrUpdate(Id, Name):
     conn = sqlite3.connect("E:\\Git Folders\\OpenCV_Screen_Locking\\FaceData.db")
     cmd = "SELECT * FROM Data WHERE ID = "+ str(Id)
@@ -57,7 +58,7 @@ def getID(path1):
 
         ID = int(os.path.split(imagepath)[-1].split('.')[1])
 
-        return ID
+        return ID'''
 
 
 def recog():
@@ -66,17 +67,11 @@ def recog():
     rec.read("E:\\Git Folders\\OpenCV_Screen_Locking\\recognize\\training.yml")  #yml file location
 
     
-    Id = pyautogui.prompt(text="""
-    Enter User ID.\n\nnote: numeric data only.""", title='ChikonEye', default='none')
+    '''Id = pyautogui.prompt(text="""
+    Enter User ID.\n\nnote: numeric data only.""", title='ChikonEye', default='none')'''
     #check for user input
     
     #Id = 1 #set id variable to zero
-
-    value = 0
-
-    sample = 0
-
-    pathz = "E:\\Git Folders\\OpenCV_Screen_Locking\\newDataSet"
 
     font = cv2.FONT_HERSHEY_SIMPLEX 
     
@@ -98,10 +93,6 @@ def recog():
             end_cord_x = x+w
             end_cord_y = y+h 
 
-            sample = sample + 1
-
-            cv2.imwrite("E:\\Git Folders\\OpenCV_Screen_Locking\\newDataSet\\User." + str(Id) + "." + str(sample) + ".jpg", roi_gray)
-
             cv2.rectangle(frame, (x,y), (end_cord_x, end_cord_y), color, stroke)
 
             
@@ -113,22 +104,27 @@ def recog():
             id, conf = rec.predict(roi_gray)
             #cv2.putText(np.array(roi_gray), str(id), font, 1, col, strk)
             #print(id) #prints the id's
-            profile = getProfile(id)
+            #value = profile[1]
+    
+
+            list_img =[]
+            directory = "E:\\Git Folders\\OpenCV_Screen_Locking\\dataSet"
+            for root, dirs, files in os.walk(directory):
+                for file in files:
+                    if file.endswith('.jpg'):
+                        print (list_img.append(file))
+
+            for sample in range(1, 31):
+                final_add = str(id) + "User." + "1." + str(sample) + ".jpg"
+            print(final_add)
             
-            value = profile[1]
-
-            print("val",value)
-
-            Id = getID(pathz)
-
-            print(Id)
-
-            if(Id == value):
-
-                print("Authorized")
-
+            #img = glob.glob('E:\\Git Folders\\OpenCV_Screen_Locking\\dataSet\\*.jpg')[0].split("\\")[-1]
             
-            else:
+            #img_id = img.split(".")[1]
+            
+            #final_id = int(img_id)
+            
+            if(final_add not in file):
 
                 print("UnAuthorized")
                 #execute lock command
@@ -138,6 +134,12 @@ def recog():
                 #windows lock code to command prompt and hit 'Enter'
                 pyautogui.typewrite("rundll32.exe user32.dll, LockWorkStation\n")    
 
+            
+            else:
+
+                print("Authorized")
+
+                
 
             '''if id == 1:      #if authorized person 
                 print("Authorized Person\n") #do nothing
@@ -180,10 +182,6 @@ def data_Train():
     id = pyautogui.prompt(text="""
     Enter User ID.\n\nnote: numeric data only.""", title='ChikonEye', default='none')
     #check for user input
-    name = pyautogui.prompt(text="""
-    Enter User ID.\n\nnote: numeric data only.""", title='ChikonEye', default='none')
-
-    insertOrUpdate(id, name)    
     
     """
     if id >  :
